@@ -2,9 +2,11 @@ import thunk from 'redux-thunk';
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux';
 import initialState from './initialState';
 import tablesReducer from './tablesRedux';
+import loadingReducer from './loadingRedux';
 
 const subreducers = {
   tables: tablesReducer,
+  loadingFetching: loadingReducer,
 }
 
 const reducer = combineReducers(subreducers);

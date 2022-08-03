@@ -1,5 +1,7 @@
 import {nanoid} from 'nanoid';
+import { updateLoading } from './loadingRedux';
 export const getAllTables = ({ tables }) => tables;
+export const getLoadingFetching = ({ loadingFetching }) => loadingFetching;
 
 export const getSingleTableById = ({ tables }, tableId) => tables
   .find(table => (table.id === tableId));
@@ -14,29 +16,41 @@ export const addTable = payload => ({ type: ADD_TABLE, payload });
 export const editTable = payload => ({ type: EDIT_TABLE, payload });
 export const removeTable = payload => ({ type: REMOVE_TABLE, payload });
 export const updateTables = payload => ({ type: UPDATE_TABLES, payload });
+
 export const fetchTables = () => {
-    return (dispatch) => { fetch('http://localhost:3131/tables') .then(res => res.json()) .then(tables => dispatch(updateTables(tables)));};
-};
-
-// https://youtu.be/wmmTOT8tL68
-export const addTableRequest = (newTable) => {
   return (dispatch) => {
-    const options = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(newTable),
-    };
-
-    fetch('http://localhost:3131/tables', options)
-      .then(() => dispatch(addTable(newTable)))
+    dispatch(updateLoading(true));
+    fetch('http://localhost:3131/tables')
+      .then(response => {
+        if (response.status === 200) {
+          return response.json()
+            .then(tables => {
+              dispatch(updateTables(tables));
+              dispatch(updateLoading(false));
+            });
+        }
+      });
   };
 };
 
+export const editTablesRequest = (editTables) => {
+  return (dispatch) => {
+    const options = {
+      method: 'PATCH',
 
+      headers: {
+        'Content-Type': 'application/json'
+      },
 
-const postsReducer = (statePart = [], action) => {
+      body: JSON.stringify(editTables)
+    };
+
+    fetch('http://localhost:3131/tables/' + editTables.id, options)
+      .then(() => dispatch(editTable(editTables)))
+  };
+}
+
+const tablesReducer = (statePart = [], action) => {
   switch (action.type) {
     case ADD_TABLE:
       return [...statePart, { ...action.payload, id: nanoid() }];
@@ -51,4 +65,4 @@ const postsReducer = (statePart = [], action) => {
   }
 }
 
-export default postsReducer;
+export default tablesReducer;

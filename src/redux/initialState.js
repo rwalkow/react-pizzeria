@@ -1,4 +1,5 @@
 const initialState = {
+  loadingFetching: true,
   tables: [ ],
 };
 
